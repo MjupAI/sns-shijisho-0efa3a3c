@@ -44,6 +44,7 @@ label.ok input{width:24px;height:24px;accent-color:var(--ok)}
 .body{margin:6px 0 0 50px}@media(max-width:560px){.body{margin-left:0}}
 .body p{margin:6px 0}
 .shot{display:block;max-width:100%;height:auto;border:1px solid var(--line);border-radius:10px;margin:8px 0;cursor:zoom-in}
+.shotf{margin:10px 0}.shotf figcaption{font-size:15px;font-weight:700;margin-top:4px}.shotf .shot{margin:0}
 .cap{font-size:13.5px;color:var(--sub);margin:-2px 0 6px}
 .copybox{border:1.5px solid #cfd9f2;border-radius:12px;background:#f7f9ff;margin:10px 0;overflow:hidden}
 .copybox .hd{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#eaf0ff;padding:6px 10px 6px 14px;font-weight:700;font-size:14.5px;color:var(--brand-d)}
@@ -97,6 +98,10 @@ function overview(){
  <h2 style="margin-top:18px;font-size:18px">準備するもの</h2>
  <table class="items">${o.items.map(i=>`<tr><td>${esc(i[0])}</td><td>${esc(i[1])}</td></tr>`).join('')}</table>
  <div class="warn">⚠️ ${esc(o.warn)}</div>
+ <h2 style="margin-top:18px;font-size:18px">使うサービスの入口</h2><div class="dls">${LINKS_IN.map(l=>`<a class="dl" href="${l[1]}" target="_blank" rel="noopener"><span><b>${esc(l[0])}</b><br><span class="small">${l[1].replace('https://','')}</span></span></a>`).join('')}</div>
+ <h2 style="margin-top:14px;font-size:18px">職員さんに聞いて、決めておくもの</h2><ul style="margin:4px 0 0;padding-left:22px">${ASK_STAFF.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+ <details class="more" style="margin-top:14px"><summary>ことばの説明</summary><table class="items">${GLOSS.map(g=>`<tr><td>${esc(g[0])}</td><td>${esc(g[1])}</td></tr>`).join('')}</table></details>
+ <p class="small" style="margin:12px 0 0">${esc(o.stepnote)}</p>
  <h2 style="margin-top:18px;font-size:18px">納品先と、提出のきまり</h2>
  <p style="margin:0 0 6px"><b>納品先：</b>${esc(o.submit.to)}</p>
  <p style="margin:0 0 6px"><b>提出するもの：</b>${esc(o.submit.what)}</p>
@@ -111,15 +116,19 @@ function stepHTML(p,s,i){
  const imgs=[s.img,...(s.imgs||[])].filter(Boolean);
  return`<section class="step${d?' done':''}" id="st-${p}-${i}"><header><span class="num">${d?'✓':i+1}</span><h3>${esc(s.t)}</h3><label class="ok"><input type="checkbox" data-k="${k}" ${d?'checked':''}>できた</label></header><div class="body">
  ${(s.p||[]).map(x=>`<p>${esc(x)}</p>`).join('')}
+ ${s.shots?s.shots.map(x=>`<figure class="shotf"><img class="shot" src="img/${x[0]}" alt="${esc(x[1])}" loading="lazy"><figcaption>${esc(x[1])}</figcaption></figure>`).join(''):''}
  ${s.dl?`<div class="dls">${s.dl.map(k=>{const d=DL[k];return`<a class="dl" href="files/${d.file}" download="${d.file}"><img src="files/${d.img}" alt="" loading="lazy"><span><b>${esc(d.label)}</b><br><span class="small">押すと、保存されます</span></span></a>`}).join('')}</div>`:''}
+ ${s.link?`<p><a class="btn" href="${s.link.href}" target="_blank" rel="noopener">${esc(s.link.label)}</a></p>`:''}
+ ${s.order?orderTable():''}
  ${s.copy?(Array.isArray(s.copy)?s.copy:[s.copy]).map(copybox).join(''):''}
  ${imgs.map(m=>`<img class="shot" src="img/${m}" alt="${esc(s.t)}の画面" loading="lazy">`).join('')}
  ${s.imgcap?`<div class="cap">${esc(s.imgcap)}</div>`:''}
  ${s.checks?s.checks.map((c,n)=>`<label class="chk"><input type="checkbox" data-k="${k}.c${n}" ${store[k+'.c'+n]?'checked':''}><span>${esc(c)}</span></label>`).join(''):''}
- ${s.details?s.details.map(d=>`<details class="more"><summary>${esc(d.title)}</summary><ol>${d.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol></details>`).join(''):''}
+ ${s.details?s.details.map(d=>`<details class="more"${s.open?' open':''}><summary>${esc(d.title)}</summary><ol>${d.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol></details>`).join(''):''}
  ${s.warn?`<div class="warn">⚠️ <b>注意</b>　${esc(s.warn)}</div>`:''}
  ${s.ok?`<div class="okbox"><b>✅ こうなればOK</b>　${esc(s.ok)}</div>`:''}
  </div></section>`}
+const orderTable=()=>`<table class="items" style="margin:10px 0"><tr>${ORDER.head.map(x=>`<td style="background:#eaf0ff;font-weight:800">${esc(x)}</td>`).join('')}</tr>${ORDER.rows.map(r=>`<tr>${r.map((x,i)=>`<td style="${i==0?'font-weight:800;background:#f5f8ff':''}">${esc(x)}</td>`).join('')}</tr>`).join('')}</table><div class="warn" style="margin-top:0">${esc(ORDER.note)}</div>`;
 function view(){
  const h=location.hash.replace(/^#\/?/,'')||'first';
  const tabs=[...PHASES.map(p=>({k:p.key,l:p.label})),{k:'help',l:'困ったとき'}];
