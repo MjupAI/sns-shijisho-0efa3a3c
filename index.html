@@ -102,6 +102,8 @@ function overview(){
  <h2 style="margin-top:14px;font-size:18px">職員さんに聞いて、決めておくもの</h2><ul style="margin:4px 0 0;padding-left:22px">${ASK_STAFF.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
  <details class="more" style="margin-top:14px"><summary>ことばの説明</summary><table class="items">${GLOSS.map(g=>`<tr><td>${esc(g[0])}</td><td>${esc(g[1])}</td></tr>`).join('')}</table></details>
  <p class="small" style="margin:12px 0 0">${esc(o.stepnote)}</p>
+ <p class="small" style="margin:8px 0 0">📷 ${esc(IMGNOTE)}</p>
+ <p class="small" style="margin:8px 0 0">🖥 パソコンとスマホ：ChatGPT・Canvaは、どちらでもできます。Instagramの投稿は、スマホで行います（職員さんと一緒に）。</p>
  <h2 style="margin-top:18px;font-size:18px">納品先と、提出のきまり</h2>
  <p style="margin:0 0 6px"><b>納品先：</b>${esc(o.submit.to)}</p>
  <p style="margin:0 0 6px"><b>提出するもの：</b>${esc(o.submit.what)}</p>
