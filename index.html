@@ -12,7 +12,8 @@
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:17px;line-height:1.75;-webkit-text-size-adjust:100%}
 .wrap{max-width:860px;margin:0 auto;padding:0 16px 80px}
 header.top{background:linear-gradient(135deg,#e1306c,#f77737);color:#fff;padding:28px 0 58px}
-header.top .wrap{padding-bottom:0}
+header.top .wrap{padding-bottom:0;position:relative}
+.bigbtn{position:absolute;right:16px;top:16px;z-index:2;min-height:44px;padding:0 16px;border-radius:99px;border:2px solid #fff;background:rgba(255,255,255,.15);color:#fff;font-weight:800;font-size:15px;cursor:pointer}body.big{font-size:21px}body.big .small{font-size:16px}body.big .copybox pre{font-size:19px}
 header.top .eyebrow{font-size:13px;letter-spacing:.12em;opacity:.9}
 header.top h1{margin:4px 0 6px;font-size:28px}
 header.top p{margin:0;opacity:.95;font-size:15px}
@@ -50,6 +51,13 @@ label.ok input{width:24px;height:24px;accent-color:var(--ok)}
 .copybox pre mark{background:#ffe98a;border-radius:4px;padding:0 3px}
 .copy{flex:none;min-height:40px;padding:0 16px;border-radius:10px;border:1.5px solid var(--brand);background:#fff;color:var(--brand-d);font-weight:800;font-size:14.5px;cursor:pointer}
 .copy.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.dls{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:10px 0}
+a.dl{display:flex;align-items:center;gap:12px;border:2px solid var(--brand);border-radius:14px;padding:10px;text-decoration:none;color:var(--ink);background:#f7faff;min-height:64px}
+a.dl img{width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--line);background:#fff}
+a.dl:hover{background:#eaf2ff}
+details.more{border:1px solid var(--line);border-radius:12px;padding:2px 14px;margin:8px 0;background:#fafbff}
+details.more summary{min-height:44px;display:flex;align-items:center;font-weight:800;cursor:pointer}
+details.more ol{margin:4px 0 10px;padding-left:22px}details.more li{margin:6px 0}
 .chk{display:flex;align-items:flex-start;gap:10px;min-height:44px;margin:6px 0;font-size:16.5px}
 .chk input{width:24px;height:24px;margin-top:4px;accent-color:var(--ok)}
 table.help{border-collapse:collapse;width:100%}table.help td{border:1px solid var(--line);padding:10px 12px;vertical-align:top}table.help td:first-child{background:#fff7de;font-weight:700;width:42%}
@@ -62,7 +70,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #ffb0
 </style>
 </head>
 <body>
-<header class="top"><div class="wrap"><div class="eyebrow">ESPICT SCHOOL</div><h1>SNS投稿のつくり方</h1><p>シートから情報を選ぶ → ChatGPTで投稿文と画像を作る → Instagramに投稿する</p></div></header>
+<header class="top"><div class="wrap"><button id="big" class="bigbtn" type="button" aria-pressed="false">文字を大きく</button><div class="eyebrow">ESPICT SCHOOL</div><h1>SNS投稿のつくり方</h1><p>シートから情報を選ぶ → ChatGPTで投稿文と画像を作る → Instagramに投稿する</p></div></header>
 <main class="wrap">
 <section class="card" id="overview"></section>
 <nav class="tabs" id="tabs" aria-label="手順の切り替え"></nav>
@@ -103,10 +111,12 @@ function stepHTML(p,s,i){
  const imgs=[s.img,...(s.imgs||[])].filter(Boolean);
  return`<section class="step${d?' done':''}" id="st-${p}-${i}"><header><span class="num">${d?'✓':i+1}</span><h3>${esc(s.t)}</h3><label class="ok"><input type="checkbox" data-k="${k}" ${d?'checked':''}>できた</label></header><div class="body">
  ${(s.p||[]).map(x=>`<p>${esc(x)}</p>`).join('')}
+ ${s.dl?`<div class="dls">${s.dl.map(k=>{const d=DL[k];return`<a class="dl" href="files/${d.file}" download="${d.file}"><img src="files/${d.img}" alt="" loading="lazy"><span><b>${esc(d.label)}</b><br><span class="small">押すと、保存されます</span></span></a>`}).join('')}</div>`:''}
  ${s.copy?(Array.isArray(s.copy)?s.copy:[s.copy]).map(copybox).join(''):''}
  ${imgs.map(m=>`<img class="shot" src="img/${m}" alt="${esc(s.t)}の画面" loading="lazy">`).join('')}
  ${s.imgcap?`<div class="cap">${esc(s.imgcap)}</div>`:''}
  ${s.checks?s.checks.map((c,n)=>`<label class="chk"><input type="checkbox" data-k="${k}.c${n}" ${store[k+'.c'+n]?'checked':''}><span>${esc(c)}</span></label>`).join(''):''}
+ ${s.details?s.details.map(d=>`<details class="more"><summary>${esc(d.title)}</summary><ol>${d.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol></details>`).join(''):''}
  ${s.warn?`<div class="warn">⚠️ <b>注意</b>　${esc(s.warn)}</div>`:''}
  ${s.ok?`<div class="okbox"><b>✅ こうなればOK</b>　${esc(s.ok)}</div>`:''}
  </div></section>`}
@@ -127,6 +137,8 @@ document.addEventListener('click',async e=>{
  if(ok){b.classList.add('ok');b.textContent='コピーした';toast('コピーしました');setTimeout(()=>{b.classList.remove('ok');b.textContent='コピー'},1400)}else toast('コピーできませんでした。文を選んで、手でコピーしてください')});
 addEventListener('keydown',e=>{if(e.key==='Escape')$('#lb').classList.remove('on')});
 addEventListener('hashchange',()=>{view();scrollTo(0,0)});
+try{if(localStorage.getItem('sns-big')==='1'){document.body.classList.add('big');$('#big').setAttribute('aria-pressed','true')}}catch(e){}
+$('#big').addEventListener('click',()=>{const on=document.body.classList.toggle('big');$('#big').setAttribute('aria-pressed',on);try{localStorage.setItem('sns-big',on?'1':'0')}catch(e){}});
 overview();view();
 </script>
 </body></html>
