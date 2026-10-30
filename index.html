@@ -122,8 +122,8 @@ function stepHTML(p,s,i){
  const imgs=[s.img,...(s.imgs||[])].filter(Boolean);
  return`<section class="step${d?' done':''}" id="st-${p}-${i}"><header><span class="num">${d?'✓':i+1}</span><h3>${esc(s.t)}</h3><label class="ok"><input type="checkbox" data-k="${k}" ${d?'checked':''}>できた</label></header><div class="body">
  ${(s.p||[]).map(x=>`<p>${esc(x)}</p>`).join('')}
- ${s.shots?s.shots.map(x=>`<figure class="shotf"><img class="shot" src="img/${x[0]}" alt="${esc(x[1])}" loading="lazy"><figcaption>${esc(x[1])}</figcaption></figure>`).join(''):''}
  ${s.dl?`<div class="dls">${s.dl.map(k=>{const d=DL[k];return`<a class="dl" href="files/${d.file}" download="${d.file}"><img src="files/${d.img}" alt="" loading="lazy"><span><b>${esc(d.label)}</b><br><span class="small">押すと、保存されます</span></span></a>`}).join('')}</div>`:''}
+ ${s.shots?s.shots.map(x=>`<figure class="shotf"><img class="shot" src="img/${x[0]}" alt="${esc(x[1])}" loading="lazy"><figcaption>${esc(x[1])}</figcaption></figure>`).join(''):''}
  ${s.link?`<p><a class="btn" href="${s.link.href}" target="_blank" rel="noopener">${esc(s.link.label)}</a></p>`:''}
  ${s.order?orderTable():''}
  ${s.copy?(Array.isArray(s.copy)?s.copy:[s.copy]).map(copybox).join(''):''}
