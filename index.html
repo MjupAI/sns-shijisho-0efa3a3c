@@ -95,7 +95,7 @@ function overview(){
  $('#overview').innerHTML=`<h2>この作業について</h2>
  <p style="margin:0 0 6px"><b>目的：</b>${esc(o.purpose)}</p>
  <p style="margin:0 0 10px"><b>時間：</b>${esc(o.time)}</p>
- <div class="flowbar"><div>① 最初に1回だけ<br><span class="small">アカウントと固定3投稿</span></div><div>② 1投稿ごと<br><span class="small">17のステップ</span></div><div>③ 提出<br><span class="small">投稿のリンク</span></div></div>
+ <div class="flowbar"><div>① 最初に1回だけ<br><span class="small">アカウント（職員さんと）→固定3投稿</span></div><div>② 1投稿ごと<br><span class="small">17のステップ</span></div><div>③ 提出<br><span class="small">投稿のリンク</span></div></div>
  <h2 style="margin-top:16px;font-size:18px">職員さんに聞いて、決めておくもの</h2><ul style="margin:4px 0 0;padding-left:22px">${ASK_STAFF.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
  <p style="margin:14px 0 0;text-align:center"><a class="btn" href="#/first">はじめる →</a></p>
  <details class="more" style="margin-top:14px"><summary>はじめる前に読む（準備するもの・納品先・用語）</summary>
@@ -145,13 +145,13 @@ function stepsView(ph){
  return`<div class="small" style="text-align:center">${c+1} / ${n} 番目</div>`+stepHTML(ph.key,ph.steps[c],c)+`<div class="navrow"><button class="btn alt" id="prev" type="button" ${c===0?'disabled':''}>← もどる</button><button class="btn" id="next" type="button">${c===n-1?'ぜんぶ終わり':'できた → 次へ'}</button></div><p style="text-align:center;margin:8px 0 0"><button class="linkbtn" id="toall" type="button">ぜんぶの手順を一覧で見る</button></p>`}
 function bindNav(ph){
  const n=ph.steps.length;const go=d=>{let c=+(store['cur.'+ph.key]||0)+d;c=Math.max(0,Math.min(n-1,c));store['cur.'+ph.key]=c;save();view();scrollTo(0,0)};
- const nx=$('#next');if(nx)nx.addEventListener('click',()=>{const c=+(store['cur.'+ph.key]||0);store[key(ph.key,c)]=1;save();if(c>=n-1){toast('このタブは終わりです。次へ進みます');location.hash=ph.key==='first'?'#/each':'#/help';return}go(1)});
+ const nx=$('#next');if(nx)nx.addEventListener('click',()=>{const c=+(store['cur.'+ph.key]||0);store[key(ph.key,c)]=1;save();if(c>=n-1){toast('このタブは終わりです。次へ進みます');location.hash=ph.key==='acct'?'#/first':ph.key==='first'?'#/each':'#/help';return}go(1)});
  const pv=$('#prev');if(pv)pv.addEventListener('click',()=>go(-1));
  const ta=$('#toall');if(ta)ta.addEventListener('click',()=>{showAll=true;view()});
  const to=$('#toone');if(to)to.addEventListener('click',()=>{showAll=false;view()});
 }
 function view(){
- const h=location.hash.replace(/^#\/?/,'')||'first';
+ const h=location.hash.replace(/^#\/?/,'')||'acct';
  const tabs=[...PHASES.map(p=>({k:p.key,l:p.label})),{k:'help',l:'困ったとき'}];
  $('#tabs').innerHTML=tabs.map(t=>`<a href="#/${t.k}" class="${t.k===h?'on':''}">${t.l}</a>`).join('');
  const v=$('#view');
