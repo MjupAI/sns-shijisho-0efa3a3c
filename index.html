@@ -68,6 +68,7 @@ table.help{border-collapse:collapse;width:100%}table.help td{border:1px solid va
 a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #ffb000;outline-offset:2px}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 @media print{header.top,nav.tabs,.toast,.copy{display:none}body{background:#fff}.card,.step{box-shadow:none;break-inside:avoid}}
+.navrow{display:flex;gap:10px;margin-top:16px}.navrow .btn{flex:1;border:0;font-size:17px;cursor:pointer}.btn.alt{background:#fff;color:var(--brand-d);border:2px solid var(--brand);cursor:pointer}.btn[disabled]{opacity:.4}.linkbtn{background:none;border:0;color:var(--brand-d);text-decoration:underline;font-size:15px;min-height:44px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -95,6 +96,8 @@ function overview(){
  <p style="margin:0 0 6px"><b>目的：</b>${esc(o.purpose)}</p>
  <p style="margin:0 0 10px"><b>時間：</b>${esc(o.time)}</p>
  <div class="flowbar"><div>① 最初に1回だけ<br><span class="small">アカウントと固定3投稿</span></div><div>② 1投稿ごと<br><span class="small">17のステップ</span></div><div>③ 提出<br><span class="small">投稿のリンク</span></div></div>
+ <p style="margin:14px 0 0;text-align:center"><a class="btn" href="#/first">はじめる →</a></p>
+ <details class="more" style="margin-top:14px"><summary>はじめる前に読む（準備するもの・納品先・用語）</summary>
  <h2 style="margin-top:18px;font-size:18px">準備するもの</h2>
  <table class="items">${o.items.map(i=>`<tr><td>${esc(i[0])}</td><td>${esc(i[1])}</td></tr>`).join('')}</table>
  <div class="warn">⚠️ ${esc(o.warn)}</div>
@@ -110,7 +113,7 @@ function overview(){
  <p style="margin:0 0 6px"><b>提出するもの：</b>${esc(o.submit.what)}</p>
  ${copybox({label:'提出の書き方（5つ）',text:o.submit.text})}
  <p class="small" style="margin:0">${esc(o.submit.note)}</p>
- <p class="small" style="margin:10px 0 0">${esc(o.relation)}</p>`;
+ <p class="small" style="margin:10px 0 0">${esc(o.relation)}</p></details>`;
 }
 const key=(p,i)=>`${p}.${i}`;
 const prog=p=>{const ph=PHASES.find(x=>x.key===p);let d=0;ph.steps.forEach((_,i)=>{if(store[key(p,i)])d++});return[d,ph.steps.length]};
@@ -132,6 +135,20 @@ function stepHTML(p,s,i){
  ${s.ok?`<div class="okbox"><b>✅ こうなればOK</b>　${esc(s.ok)}</div>`:''}
  </div></section>`}
 const orderTable=()=>`<table class="items" style="margin:10px 0"><tr>${ORDER.head.map(x=>`<td style="background:#eaf0ff;font-weight:800">${esc(x)}</td>`).join('')}</tr>${ORDER.rows.map(r=>`<tr>${r.map((x,i)=>`<td style="${i==0?'font-weight:800;background:#f5f8ff':''}">${esc(x)}</td>`).join('')}</tr>`).join('')}</table><div class="warn" style="margin-top:0">${esc(ORDER.note)}</div>`;
+
+let showAll=false;
+function stepsView(ph){
+ const n=ph.steps.length;let c=+(store['cur.'+ph.key]||0);
+ if(c<0||c>=n)c=0;
+ if(showAll)return`<p style="text-align:center;margin:0"><button class="btn alt" id="toone" type="button">1つずつ表示にもどす</button></p>`+ph.steps.map((s,i)=>stepHTML(ph.key,s,i)).join('');
+ return`<div class="small" style="text-align:center">${c+1} / ${n} 番目</div>`+stepHTML(ph.key,ph.steps[c],c)+`<div class="navrow"><button class="btn alt" id="prev" type="button" ${c===0?'disabled':''}>← もどる</button><button class="btn" id="next" type="button">${c===n-1?'ぜんぶ終わり':'できた → 次へ'}</button></div><p style="text-align:center;margin:8px 0 0"><button class="linkbtn" id="toall" type="button">ぜんぶの手順を一覧で見る</button></p>`}
+function bindNav(ph){
+ const n=ph.steps.length;const go=d=>{let c=+(store['cur.'+ph.key]||0)+d;c=Math.max(0,Math.min(n-1,c));store['cur.'+ph.key]=c;save();view();scrollTo(0,0)};
+ const nx=$('#next');if(nx)nx.addEventListener('click',()=>{const c=+(store['cur.'+ph.key]||0);store[key(ph.key,c)]=1;save();if(c>=n-1){toast('このタブは終わりです');view();return}go(1)});
+ const pv=$('#prev');if(pv)pv.addEventListener('click',()=>go(-1));
+ const ta=$('#toall');if(ta)ta.addEventListener('click',()=>{showAll=true;view()});
+ const to=$('#toone');if(to)to.addEventListener('click',()=>{showAll=false;view()});
+}
 function view(){
  const h=location.hash.replace(/^#\/?/,'')||'first';
  const tabs=[...PHASES.map(p=>({k:p.key,l:p.label})),{k:'help',l:'困ったとき'}];
@@ -139,7 +156,8 @@ function view(){
  const v=$('#view');
  if(h==='help'){v.innerHTML=`<section class="card"><h2>困ったとき</h2><table class="help">${HELP.map(r=>`<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join('')}</table></section>`;return}
  const ph=PHASES.find(p=>p.key===h)||PHASES[0];const[d,t]=prog(ph.key);
- v.innerHTML=`<section class="card"><h2 style="margin-bottom:4px">${esc(ph.title)}</h2><div class="warn" style="margin-top:8px">${esc(ph.note)}</div><div style="margin-top:12px"><div class="bar"><i id="bar" style="width:${d/t*100}%"></i></div><div class="small" id="barlab" style="margin-top:6px">${d} / ${t} ステップ</div></div></section>`+ph.steps.map((s,i)=>stepHTML(ph.key,s,i)).join('')+(ph.key==='first'?`<p style="text-align:center;margin:20px 0 0"><a class="btn" href="#/each">次へ：1投稿ごとの作業 →</a></p>`:`<p style="text-align:center;margin:20px 0 0"><a class="btn" href="#/help">困ったとき →</a></p>`);
+ v.innerHTML=`<section class="card"><h2 style="margin-bottom:4px">${esc(ph.title)}</h2><div class="warn" style="margin-top:8px">${esc(ph.note)}</div><div style="margin-top:12px"><div class="bar"><i id="bar" style="width:${d/t*100}%"></i></div><div class="small" id="barlab" style="margin-top:6px">${d} / ${t} ステップ</div></div></section>`+stepsView(ph)+(ph.key==='first'?`<p style="text-align:center;margin:20px 0 0"><a class="btn" href="#/each">次へ：1投稿ごとの作業 →</a></p>`:`<p style="text-align:center;margin:20px 0 0"><a class="btn" href="#/help">困ったとき →</a></p>`);
+ bindNav(ph);
  v.querySelectorAll('input[data-k]').forEach(el=>el.addEventListener('change',()=>{store[el.dataset.k]=el.checked?1:0;save();if(!el.dataset.k.includes('.c')){const sec=el.closest('.step');sec.classList.toggle('done',el.checked);$('.num',sec).textContent=el.checked?'✓':(+sec.id.split('-').pop()+1);const[d2,t2]=prog(ph.key);$('#bar').style.width=(d2/t2*100)+'%';$('#barlab').textContent=`${d2} / ${t2} ステップ`}}));
 }
 document.addEventListener('click',async e=>{
